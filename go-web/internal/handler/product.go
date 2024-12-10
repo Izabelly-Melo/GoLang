@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -25,13 +24,7 @@ func (h *HandlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	var reqBody model.ReqBodyProduct
 	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		resBody := model.ResBodyProduct{
-			Message: "Erro ao criar produto!",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
@@ -46,14 +39,7 @@ func (h *HandlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 	response, err := h.Service.AddProduct(productBody)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		log.Println(err)
-		resBody := model.ResBodyProduct{
-			Message: "Erro ao criar produto(s)!",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusBadRequest, "Failed to create product")
 		return
 	}
 
@@ -63,22 +49,14 @@ func (h *HandlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		Error:   false,
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(body)
+	respondJSON(w, http.StatusCreated, body)
 }
 
 func (h *HandlerProduct) GetAllProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	listProducts, err := h.Service.GetAllProducts()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Panicln(err)
-		resBody := model.ResBodyProduct{
-			Message: "Erro ao listar produtos!",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusInternalServerError, "Failed to retrieve products")
 		return
 	}
 
@@ -91,27 +69,13 @@ func (h *HandlerProduct) GetProductByID(w http.ResponseWriter, r *http.Request) 
 	param := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(param)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Panicln(err)
-		resBody := model.ResBodyProduct{
-			Message: "Erro ao encontrar ID",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusBadRequest, "Invalid ID format")
 		return
 	}
 
 	listProducts, err := h.Service.GetProductByID(id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Println(err)
-		resBody := model.ResBodyProduct{
-			Message: "Erro",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusInternalServerError, "Failed to retrieve product")
 		return
 	}
 
@@ -121,11 +85,10 @@ func (h *HandlerProduct) GetProductByID(w http.ResponseWriter, r *http.Request) 
 			Data:    nil,
 			Error:   false,
 		}
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(resBody)
+		respondJSON(w, http.StatusOK, resBody)
+
 	} else {
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(listProducts)
+		respondJSON(w, http.StatusOK, listProducts)
 	}
 }
 
@@ -134,32 +97,17 @@ func (h *HandlerProduct) SearchProduct(w http.ResponseWriter, r *http.Request) {
 	param := r.URL.Query().Get("priceGt")
 	price, err := strconv.ParseFloat(param, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Println(err)
-		resBody := model.ResBodyProduct{
-			Message: "Formato de preço inválido",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusBadRequest, "Invalid Price format")
 		return
 	}
 
 	products, err := h.Service.GetProductsPrice(price)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Println(err)
-		resBody := model.ResBodyProduct{
-			Message: "Falha ao listar produtos",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusInternalServerError, "Failed to retrieve product")
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(products)
+	respondJSON(w, http.StatusOK, products)
 }
 
 func (h *HandlerProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) {
@@ -167,26 +115,13 @@ func (h *HandlerProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	param := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(param)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		log.Println(err)
-		resBody := model.ResBodyProduct{
-			Message: "Erro ao encontrar ID",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusBadRequest, "Invalid ID format")
 		return
 	}
 
 	var reqBody model.ReqBodyProduct
 	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		resBody := model.ResBodyProduct{
-			Message: "Erro ao alterar produto!",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusBadRequest, "Failed to update product")
 		return
 	}
 
@@ -202,13 +137,7 @@ func (h *HandlerProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	products, err := h.Service.UpdateProduct(newProduct, id)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		resBody := model.ResBodyProduct{
-			Message: "Erro ao alterar produto",
-			Data:    &products,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusInternalServerError, "Failed to update product")
 		return
 	}
 
@@ -218,33 +147,20 @@ func (h *HandlerProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		Error:   false,
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(body)
+	respondJSON(w, http.StatusOK, body)
 }
 
 func (h *HandlerProduct) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	param := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(param)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		resBody := model.ResBodyProduct{
-			Message: "ID inválido",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusBadRequest, "Invalid Id format")
 		return
 	}
 
 	err = h.Service.DeleteProduct(id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		resBody := model.ResBodyProduct{
-			Message: "Não foi possível excluir produto",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusInternalServerError, "Failed to delete product")
 		return
 	}
 
@@ -254,45 +170,26 @@ func (h *HandlerProduct) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 		Error:   false,
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(resBody)
+	respondJSON(w, http.StatusOK, resBody)
 }
 
 func (h *HandlerProduct) PatchProduct(w http.ResponseWriter, r *http.Request) {
 	param := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(param)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		resBody := model.ResBodyProduct{
-			Message: "ID Inválido",
-			Data:    nil,
-			Error:   false,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusBadRequest, "Invalid Id format")
 		return
 	}
 
 	var reqBody model.ReqPatchBodyProduct
 	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		resBody := model.ResBodyProduct{
-			Message: "Erro ao alterar produto!",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusInternalServerError, "Failed to update product")
 		return
 	}
 
 	productSave, err := h.Service.GetProductByID(id)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		resBody := model.ResBodyProduct{
-			Message: "Erro ao tentar encontrar produto!",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusInternalServerError, "Failed to retrieve product")
 		return
 	}
 
@@ -338,13 +235,7 @@ func (h *HandlerProduct) PatchProduct(w http.ResponseWriter, r *http.Request) {
 
 	product, err := h.Service.PatchProduct(resBody, id)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		resBody := model.ResBodyProduct{
-			Message: "Erro ao alterar",
-			Data:    nil,
-			Error:   true,
-		}
-		json.NewEncoder(w).Encode(resBody)
+		handleError(w, http.StatusInternalServerError, "Failed to update product")
 		return
 	}
 
@@ -354,8 +245,7 @@ func (h *HandlerProduct) PatchProduct(w http.ResponseWriter, r *http.Request) {
 		Error:   false,
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(body)
+	respondJSON(w, http.StatusOK, body)
 }
 
 // Retornar instancia de HandlerProduct e inicializando o service com o valor
