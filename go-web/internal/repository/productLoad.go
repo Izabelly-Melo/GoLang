@@ -9,7 +9,7 @@ import (
 )
 
 func LoadProducts() ([]model.Product, error) {
-	file, err := os.Open("/Users/idmelo/Documents/GO/go-web/docs/products.json")
+	file, err := os.Open("/Users/idmelo/Documents/git/GoLang/go-web/docs/products.json")
 	if err != nil {
 		log.Println("Erro ao abrir arquivo", err)
 		return nil, err
@@ -35,7 +35,7 @@ func AddProduct(products []model.Product) error {
 		log.Println("Erro: ", err)
 		return err
 	}
-	err = os.WriteFile("/Users/idmelo/Documents/GO/go-web/docs/products.json", file, 0666) //0666 permite leitura e escrita
+	err = os.WriteFile("/Users/idmelo/Documents/git/GoLang/go-web/docs/products.json", file, 0666) //0666 permite leitura e escrita
 	if err != nil {
 		log.Println("Erro ao gravar no arquivo", err)
 		return err

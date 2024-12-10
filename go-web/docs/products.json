@@ -4501,11 +4501,11 @@
  },
  {
   "id": 501,
-  "name": "Produto Exemplo",
-  "quantity": 10,
-  "code_value": "123456",
-  "is_published": true,
-  "expiration": "20/10/2022",
-  "price": 19.99
+  "name": "Produto Alterado",
+  "quantity": 12,
+  "code_value": "4423456",
+  "is_published": false,
+  "expiration": "24/10/2022",
+  "price": 10.99
  }
 ]
