@@ -115,9 +115,18 @@ func (h *HandlerProduct) GetProductByID(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(listProducts)
-
+	if listProducts.ID == 0 {
+		resBody := model.ResBodyProduct{
+			Message: "Produto não existe",
+			Data:    nil,
+			Error:   false,
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(resBody)
+	} else {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(listProducts)
+	}
 }
 
 func (h *HandlerProduct) SearchProduct(w http.ResponseWriter, r *http.Request) {
@@ -152,7 +161,6 @@ func (h *HandlerProduct) SearchProduct(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(products)
 }
-
 
 func (h *HandlerProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
