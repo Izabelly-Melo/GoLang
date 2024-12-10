@@ -21,6 +21,9 @@ func main() {
 		rt.Get("/{id}", handler.GetProductByID)
 		rt.Get("/search", handler.SearchProduct)
 		rt.Post("/", handler.CreateProduct)
+		rt.Put("/{id}", handler.UpdateProduct)
+		rt.Delete("/{id}", handler.DeleteProduct)
+		rt.Patch("/{id}", handler.PatchProduct)
 	})
 
 	if err := http.ListenAndServe(":8080", rt); err != nil {
