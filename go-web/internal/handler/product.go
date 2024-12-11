@@ -21,6 +21,7 @@ func (h *HandlerProduct) Ping(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HandlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 	w.Header().Add("Content-Type", "application/json")
 	var reqBody model.ReqBodyProduct
 	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {

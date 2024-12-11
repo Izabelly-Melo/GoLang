@@ -4507,5 +4507,14 @@
   "is_published": true,
   "expiration": "25/10/2022",
   "price": 1.99
+ },
+ {
+  "id": 502,
+  "name": "Produto Exemplo12",
+  "quantity": 10,
+  "code_value": "123j6",
+  "is_published": true,
+  "expiration": "20/10/2022",
+  "price": 19.99
  }
 ]
