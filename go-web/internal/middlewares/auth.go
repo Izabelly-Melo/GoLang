@@ -1,20 +1,31 @@
 package middlewares
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 )
 
 func Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("TOKEN")
+		token := r.Header.Get("API_TOKEN")
 		if token == "" {
-			http.Error(w, "Unauthorized: Missing token", http.StatusUnauthorized)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"message": "unauthorized",
+				"error":   true,
+			})
 			return
 		}
 
 		if token != os.Getenv("API_TOKEN") {
-			http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"message": "unauthorized",
+				"error":   true,
+			})
 			return
 		}
 

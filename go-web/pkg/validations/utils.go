@@ -7,7 +7,7 @@ import (
 	"github.com/izabelly/go-web/internal/repository"
 )
 
-func ValidCodeValue(codeValue string) bool {
+func ValidCodeValue(codeValue string, repository *repository.RepositoryProduct) bool {
 	listProd, err := repository.LoadProducts()
 	if err != nil {
 		log.Println(err)

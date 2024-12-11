@@ -9,16 +9,13 @@ import (
 )
 
 type ServiceProduct struct {
-	FilePath string
+	Repository *repository.RepositoryProduct
 }
 
 func (s *ServiceProduct) AddProduct(product model.Product) (model.Product, error) {
-	listProduct, err := repository.LoadProducts()
-	if err != nil {
-		return model.Product{}, err
-	}
+	listProduct, err := s.Repository.LoadProducts()
 
-	validCodeValue := validations.ValidCodeValue(product.CodeValue)
+	validCodeValue := validations.ValidCodeValue(product.CodeValue, s.Repository)
 	validDate := validations.ValidDate(product.Expiration)
 	validName := validations.ValidName(product.Name)
 	validPrice := validations.ValidPrice(product.Price)
@@ -30,7 +27,7 @@ func (s *ServiceProduct) AddProduct(product model.Product) (model.Product, error
 
 	product.ID = len(listProduct) + 1
 
-	err = repository.AddProduct(append(listProduct, product))
+	err = s.Repository.AddProduct(append(listProduct, product))
 	if err != nil {
 		return model.Product{}, err
 	}
@@ -39,7 +36,7 @@ func (s *ServiceProduct) AddProduct(product model.Product) (model.Product, error
 }
 
 func (s *ServiceProduct) GetAllProducts() ([]model.Product, error) {
-	listProduct, err := repository.LoadProducts()
+	listProduct, err := s.Repository.LoadProducts()
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +45,7 @@ func (s *ServiceProduct) GetAllProducts() ([]model.Product, error) {
 }
 
 func (s *ServiceProduct) GetProductByID(id int) (model.Product, error) {
-	listProduct, err := repository.LoadProducts()
+	listProduct, err := s.Repository.LoadProducts()
 	if err != nil {
 		return model.Product{}, err
 	}
@@ -63,7 +60,7 @@ func (s *ServiceProduct) GetProductByID(id int) (model.Product, error) {
 }
 
 func (s *ServiceProduct) GetProductsPrice(price float64) ([]model.Product, error) {
-	listProduct, err := repository.LoadProducts()
+	listProduct, err := s.Repository.LoadProducts()
 	if err != nil {
 		return nil, err
 	}
@@ -76,9 +73,8 @@ func (s *ServiceProduct) GetProductsPrice(price float64) ([]model.Product, error
 	return getProduct, nil
 }
 
-
 func (s *ServiceProduct) UpdateProduct(newProduct model.Product, id int) (model.Product, error) {
-	listProduct, err := repository.LoadProducts()
+	listProduct, err := s.Repository.LoadProducts()
 	if err != nil {
 		return newProduct, err
 	}
@@ -116,7 +112,7 @@ func (s *ServiceProduct) UpdateProduct(newProduct model.Product, id int) (model.
 		}
 	}
 
-	err = repository.AddProduct(updatedList)
+	err = s.Repository.AddProduct(updatedList)
 	if err != nil {
 		return model.Product{}, err
 	}
@@ -124,9 +120,8 @@ func (s *ServiceProduct) UpdateProduct(newProduct model.Product, id int) (model.
 	return updatedProd, nil
 }
 
-
 func (s *ServiceProduct) DeleteProduct(id int) error {
-	listProduct, err := repository.LoadProducts()
+	listProduct, err := s.Repository.LoadProducts()
 	if err != nil {
 		return err
 	}
@@ -144,7 +139,7 @@ func (s *ServiceProduct) DeleteProduct(id int) error {
 		}
 	}
 
-	err = repository.AddProduct(updatedList)
+	err = s.Repository.AddProduct(updatedList)
 	if err != nil {
 		return err
 	}
@@ -166,6 +161,6 @@ func (s *ServiceProduct) PatchProduct(product model.Product, id int) (model.Prod
 }
 
 // Retornar instancia de ServiceProduct e inicializando o FilePath com o valor
-func NewServiceProducts(filePath string) *ServiceProduct {
-	return &ServiceProduct{FilePath: filePath}
+func NewServiceProducts(repo *repository.RepositoryProduct) *ServiceProduct {
+	return &ServiceProduct{Repository: repo}
 }

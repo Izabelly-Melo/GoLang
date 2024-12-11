@@ -85,7 +85,7 @@ func (h *HandlerProduct) GetProductByID(w http.ResponseWriter, r *http.Request) 
 			Data:    nil,
 			Error:   false,
 		}
-		respondJSON(w, http.StatusOK, resBody)
+		respondJSON(w, http.StatusNotFound, resBody)
 
 	} else {
 		respondJSON(w, http.StatusOK, listProducts)

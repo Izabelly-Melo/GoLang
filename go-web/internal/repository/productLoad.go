@@ -8,8 +8,16 @@ import (
 	"github.com/izabelly/go-web/internal/model"
 )
 
-func LoadProducts() ([]model.Product, error) {
-	file, err := os.Open("/Users/idmelo/Documents/git/GoLang/go-web/docs/products.json")
+type RepositoryProduct struct {
+	FilePath string
+}
+
+func NewRepositoryProduct(filePath string) *RepositoryProduct {
+	return &RepositoryProduct{FilePath: filePath}
+}
+
+func (r *RepositoryProduct) LoadProducts() ([]model.Product, error) {
+	file, err := os.Open(r.FilePath)
 	if err != nil {
 		log.Println("Erro ao abrir arquivo", err)
 		return nil, err
@@ -28,14 +36,14 @@ func LoadProducts() ([]model.Product, error) {
 	return products, nil
 }
 
-func AddProduct(products []model.Product) error {
+func (r *RepositoryProduct) AddProduct(products []model.Product) error {
 	//converte os produtos para json
 	file, err := json.MarshalIndent(products, "", " ")
 	if err != nil {
 		log.Println("Erro: ", err)
 		return err
 	}
-	err = os.WriteFile("/Users/idmelo/Documents/git/GoLang/go-web/docs/products.json", file, 0666) //0666 permite leitura e escrita
+	err = os.WriteFile(r.FilePath, file, 0666) //0666 permite leitura e escrita
 	if err != nil {
 		log.Println("Erro ao gravar no arquivo", err)
 		return err
