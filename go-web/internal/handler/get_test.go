@@ -192,7 +192,7 @@ func TestHandlerProduct_SearchProduct(t *testing.T) {
 		rt.Get("/products/search", handlers.SearchProduct)
 
 		// Act/When
-		req := httptest.NewRequest("GET", "/products/search?priceGt=100", nil)
+		req := httptest.NewRequest("GET", "/products/search?priceGt=352", nil)
 		req.Header.Set("API_TOKEN", "02101998")
 		res := httptest.NewRecorder()
 

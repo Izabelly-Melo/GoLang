@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/izabelly/go-web/internal/middlewares"
 	"github.com/izabelly/go-web/internal/repository"
 	"github.com/izabelly/go-web/internal/service"
 	"github.com/joho/godotenv"
@@ -25,15 +26,7 @@ func TestHandlerProduct_CreateProduct(t *testing.T) {
 		rt := chi.NewRouter()
 		rt.Post("/products", handlers.CreateProduct)
 
-		json := `
-		{
-			"name": "album",
-			"quantity": 43,
-			"code_value": "AAAA",
-			"is_published": true,
-			"expiration": "02/10/2021",
-			"price": 800
-		}`
+		json := `{"name": "album","quantity": 43,"code_value": "AAAA","is_published": true,"expiration": "02/10/2021","price": 800}`
 
 		req := httptest.NewRequest("POST", "/products", bytes.NewReader([]byte(json)))
 		req.Header.Set("API_TOKEN", "02101998")
@@ -71,14 +64,7 @@ func TestHandlerProduct_CreateProduct(t *testing.T) {
 		rt := chi.NewRouter()
 		rt.Post("/products", handlers.CreateProduct)
 
-		json := `
-		{
-				"name": "album",
-				"quantity": 43,
-				"code_value": "AAAA",
-				"is_published": true,
-				"expiration": "02/10/2021"
-		}`
+		json := `{"name": "album","quantity": 43,"code_value": "AAAA","is_published": true,"expiration": "02/10/2021"}`
 
 		req := httptest.NewRequest("POST", "/products", bytes.NewReader([]byte(json)))
 		req.Header.Set("API_TOKEN", "02101998")
@@ -87,7 +73,7 @@ func TestHandlerProduct_CreateProduct(t *testing.T) {
 
 		expectedCode := http.StatusBadRequest
 		expectedBody := `{
-				"message": "Failed to update product",
+				"message": "Failed to create product",
 				"error": true
 			}`
 
@@ -104,8 +90,9 @@ func TestHandlerProduct_CreateProduct(t *testing.T) {
 		godotenv.Load("API_TOKEN")
 		os.Setenv("API_TOKEN", "11")
 		rt := chi.NewRouter()
+		rt.Use(middlewares.Auth)
 		rt.Post("/products", handlers.CreateProduct)
-
+ 
 		json := `
 		{
 				"name": "album",
