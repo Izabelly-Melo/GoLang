@@ -32,17 +32,17 @@ func (s *ServiceTicketDefault) GetTicketsAmountByDestinationCountry(country stri
 func (s *ServiceTicketDefault) GetAverageCountry(country string) (average float64, err error) {
 	total, err := s.GetTotalAmountTickets()
 	if err != nil {
-		err = errors.New("No exists country")
+		err = errors.New("failed to retrieve the total amount of tickets")
 		return
 	}
 	dest, err := s.rp.GetTicketsByDestinationCountry(country)
 	if err != nil {
-		err = errors.New("This country not found")
+		err = errors.New("the specified country was not found")
 		return
 	}
 
 	if len(dest) < 1 {
-		err = errors.New("No tickets for this country")
+		err = errors.New("no tickets available for the specified country")
 		return
 	}
 

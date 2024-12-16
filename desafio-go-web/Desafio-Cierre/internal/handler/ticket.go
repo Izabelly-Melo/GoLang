@@ -27,7 +27,7 @@ func (h *HandlerTicketDefault) GetTotalAmountTickets(w http.ResponseWriter, r *h
 	}
 
 	response.JSON(w, http.StatusOK, map[string]any{
-		"message": "sucess",
+		"message": "Total Countries",
 		"data":    tickets,
 	})
 }
@@ -37,12 +37,13 @@ func (h *HandlerTicketDefault) GetTicketsAmountByDestinationCountry(w http.Respo
 
 	tickets, err := h.sv.GetTicketsAmountByDestinationCountry(country)
 	if err != nil {
-		response.JSON(w, http.StatusNotFound, "No tickets for this country")
-		return
+		response.JSON(w, http.StatusNotFound, map[string]string{
+			"error": "No tickets found for the specified country: " + country,
+		})
 	}
 
 	response.JSON(w, http.StatusOK, map[string]any{
-		"message": "Total this country is ",
+		"message": "Total tickets:",
 		"data":    len(tickets),
 	})
 }
@@ -51,12 +52,14 @@ func (h *HandlerTicketDefault) GetAverageCountry(w http.ResponseWriter, r *http.
 	country := chi.URLParam(r, "dest")
 	tickets, err := h.sv.GetAverageCountry(country)
 	if err != nil {
-		response.JSON(w, http.StatusNotFound, err.Error())
+		response.JSON(w, http.StatusNotFound, map[string]string{
+			"error": err.Error(),
+		})
 		return
 	}
 
 	response.JSON(w, http.StatusOK, map[string]any{
-		"message": "Average this country",
+		"message": "Average tickets for the country " + country + ":",
 		"data":    tickets,
 	})
 

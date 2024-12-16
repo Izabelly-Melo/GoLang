@@ -50,13 +50,13 @@ func (t *LoaderTicketCSV) Load() (ticket map[int]internal.TicketAttributes, err 
 		// serialize the record
 		id, err := strconv.Atoi(record[0])
 		if err != nil {
-			err = fmt.Errorf("erro conversão")
+			err = fmt.Errorf("erro convert id")
 			return nil, err
 		}
 
 		price, err := strconv.ParseFloat(record[5], 64)
 		if err != nil {
-			err = fmt.Errorf("erro conversão")
+			err = fmt.Errorf("erro convert price")
 			return nil, err
 		}
 
