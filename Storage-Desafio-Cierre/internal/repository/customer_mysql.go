@@ -68,7 +68,7 @@ func (r *CustomersMySQL) Save(c *internal.Customer) (err error) {
 	return
 }
 
-func (r *CustomersMySQL) GetGroupByConditions() (res []internal.ResCustomer, err error) {
+func (r *CustomersMySQL) GetConditionsCustomer() (customersConditions []internal.CustomersConditions, err error) {
 	query := `SELECT CASE c.condition WHEN 0 THEN 'Inativo' WHEN 1 THEN 'Ativo' END AS Conditions,` +
 		` ROUND(SUM(i.total), 2) AS Total ` +
 		` FROM customers c JOIN  invoices i ON c.id = i.customer_id` +
@@ -79,16 +79,13 @@ func (r *CustomersMySQL) GetGroupByConditions() (res []internal.ResCustomer, err
 	}
 	defer rows.Close()
 
-	// iterate over the rows
 	for rows.Next() {
-		var body internal.ResCustomer
-		// scan the row into the customer
+		var body internal.CustomersConditions
 		err := rows.Scan(&body.Condition, &body.Total)
 		if err != nil {
 			return nil, err
 		}
-		// append the customer to the slice
-		res = append(res, body)
+		customersConditions = append(customersConditions, body)
 	}
 	err = rows.Err()
 	if err != nil {
@@ -98,7 +95,7 @@ func (r *CustomersMySQL) GetGroupByConditions() (res []internal.ResCustomer, err
 	return
 }
 
-func (r *CustomersMySQL) GetAmountCostumers() (res []internal.ResAmountCustomer, err error) {
+func (r *CustomersMySQL) GetCustomersMoreActives() (customersActives []internal.CustomersMoreActives, err error) {
 	query := `SELECT c.first_name AS FirstName, c.last_name AS LastName, ROUND(SUM(i.total), 2) AS Amount FROM customers c` +
 		` JOIN invoices i ON c.id = i.customer_id WHERE c.condition = 1 ` +
 		` GROUP BY c.id, c.first_name, c.last_name ORDER BY Amount DESC LIMIT 5`
@@ -108,16 +105,13 @@ func (r *CustomersMySQL) GetAmountCostumers() (res []internal.ResAmountCustomer,
 	}
 	defer rows.Close()
 
-	// iterate over the rows
 	for rows.Next() {
-		var body internal.ResAmountCustomer
-		// scan the row into the customer
+		var body internal.CustomersMoreActives
 		err := rows.Scan(&body.FirstName, &body.LastName, &body.Amount)
 		if err != nil {
 			return nil, err
 		}
-		// append the customer to the slice
-		res = append(res, body)
+		customersActives = append(customersActives, body)
 	}
 	err = rows.Err()
 	if err != nil {

@@ -6,5 +6,5 @@ type ServiceProduct interface {
 	FindAll() (p []Product, err error)
 	// Save saves a product.
 	Save(p *Product) (err error)
-	GetTotalProductsSale() (res []ResProducts, err error)
+	GetProductsMoreSold() (products []ProductsSold, err error)
 }

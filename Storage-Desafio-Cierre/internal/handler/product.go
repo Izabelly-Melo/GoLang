@@ -27,7 +27,7 @@ type ProductJSON struct {
 	Price       float64 `json:"price"`
 }
 
-type ProductSalesJSON struct {
+type ProductsSoldJSON struct {
 	Description string `json:"description"`
 	Total       int    `json:"total"`
 }
@@ -109,20 +109,17 @@ func (h *ProductsDefault) Create() http.HandlerFunc {
 	}
 }
 
-func (h *ProductsDefault) GetTotalProductsSale() http.HandlerFunc {
+func (h *ProductsDefault) GetProductsMoreSold() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// process
-		p, err := h.sv.GetTotalProductsSale()
+		p, err := h.sv.GetProductsMoreSold()
 		if err != nil {
 			response.Error(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		// response
-		// - serialize
-		pJSON := make([]ProductSalesJSON, len(p))
+		pJSON := make([]ProductsSoldJSON, len(p))
 		for ix, v := range p {
-			pJSON[ix] = ProductSalesJSON{
+			pJSON[ix] = ProductsSoldJSON{
 				Description: v.Description,
 				Total:       v.Total,
 			}

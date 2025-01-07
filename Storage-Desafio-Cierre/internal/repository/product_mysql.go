@@ -68,24 +68,20 @@ func (r *ProductsMySQL) Save(p *internal.Product) (err error) {
 	return
 }
 
-func (r *ProductsMySQL) GetTotalProductsSale() (res []internal.ResProducts, err error) {
-	// execute the query
-	rows, err := r.db.Query("SELECT p.description AS Description, SUM(s.quantity) AS Total FROM products p JOIN sales s on p.id = s.product_id GROUP BY p.description ORDER BY Total LIMIT 5")
+func (r *ProductsMySQL) GetProductsMoreSold() (products []internal.ProductsSold, err error) {
+	rows, err := r.db.Query("SELECT p.description AS Description, SUM(s.quantity) AS Total FROM products p JOIN sales s on p.id = s.product_id GROUP BY p.description ORDER BY Total DESC LIMIT 5")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	// iterate over the rows
 	for rows.Next() {
-		var pr internal.ResProducts
-		// scan the row into the product
+		var pr internal.ProductsSold
 		err := rows.Scan(&pr.Description, &pr.Total)
 		if err != nil {
 			return nil, err
 		}
-		// append the product to the slice
-		res = append(res, pr)
+		products = append(products, pr)
 	}
 	err = rows.Err()
 	if err != nil {

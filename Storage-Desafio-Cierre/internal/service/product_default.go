@@ -25,7 +25,7 @@ func (s *ProductsDefault) Save(p *internal.Product) (err error) {
 	return
 }
 
-func (s *ProductsDefault) GetTotalProductsSale() (p []internal.ResProducts, err error) {
-	p, err = s.rp.GetTotalProductsSale()
+func (s *ProductsDefault) GetProductsMoreSold() (p []internal.ProductsSold, err error) {
+	p, err = s.rp.GetProductsMoreSold()
 	return
 }

@@ -27,12 +27,12 @@ func (s *CustomersDefault) Save(c *internal.Customer) (err error) {
 	return
 }
 
-func (s *CustomersDefault) GetGroupByConditions() (c []internal.ResCustomer, err error) {
-	c, err = s.rp.GetGroupByConditions()
+func (s *CustomersDefault) GetConditionsCustomer() (c []internal.CustomersConditions, err error) {
+	c, err = s.rp.GetConditionsCustomer()
 	return
 }
 
-func (s *CustomersDefault) GetAmountCostumers() (c []internal.ResAmountCustomer, err error) {
-	c, err = s.rp.GetAmountCostumers()
+func (s *CustomersDefault) GetCustomersMoreActives() (c []internal.CustomersMoreActives, err error) {
+	c, err = s.rp.GetCustomersMoreActives()
 	return
 }

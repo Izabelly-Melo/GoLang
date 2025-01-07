@@ -16,7 +16,7 @@ type Product struct {
 	ProductAttributes
 }
 
-type ResProducts struct {
+type ProductsSold struct {
 	Description string
 	Total       int
 }

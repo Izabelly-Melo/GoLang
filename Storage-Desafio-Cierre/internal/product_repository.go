@@ -6,5 +6,5 @@ type RepositoryProduct interface {
 	FindAll() (p []Product, err error)
 	// Save saves a product into the database.
 	Save(p *Product) (err error)
-	GetTotalProductsSale() (res []ResProducts, err error)
+	GetProductsMoreSold() (products []ProductsSold, err error)
 }

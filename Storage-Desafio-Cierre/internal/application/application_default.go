@@ -5,7 +5,10 @@ import (
 	"app/internal/repository"
 	"app/internal/service"
 	"database/sql"
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -67,6 +70,54 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	if err != nil {
 		return
 	}
+
+	customers, err := a.CheckTableContainsData("fantasy_products.customers")
+	if err != nil {
+		return fmt.Errorf("erro ao verificar customers: %w", err)
+	}
+	if !customers {
+		err = a.ImportCustomersFromJSON("./docs/db/json/customers.json")
+		if err != nil {
+			return fmt.Errorf("erro ao importar customers: %w", err)
+		}
+	}
+
+	// Verifique se as invoices já existem
+	invoices, err := a.CheckTableContainsData("fantasy_products.invoices")
+	if err != nil {
+		return fmt.Errorf("erro ao verificar invoices: %w", err)
+	}
+	if !invoices {
+		err = a.ImportInvoicesFromJSON("./docs/db/json/invoices.json")
+		if err != nil {
+			return fmt.Errorf("erro ao importar invoices: %w", err)
+		}
+	}
+
+	// Verifique se os products já existem
+	products, err := a.CheckTableContainsData("fantasy_products.products")
+	if err != nil {
+		return fmt.Errorf("erro ao verificar products: %w", err)
+	}
+	if !products {
+		err = a.ImportProductsFromJSON("./docs/db/json/products.json")
+		if err != nil {
+			return fmt.Errorf("erro ao importar products: %w", err)
+		}
+	}
+
+	// Verifique se as sales já existem
+	sales, err := a.CheckTableContainsData("fantasy_products.sales")
+	if err != nil {
+		return fmt.Errorf("erro ao verificar sales: %w", err)
+	}
+	if !sales {
+		err = a.ImportSalesFromJSON("./docs/db/json/sales.json")
+		if err != nil {
+			return fmt.Errorf("erro ao importar sales: %w", err)
+		}
+	}
+
 	// - repository
 	rpCustomer := repository.NewCustomersMySQL(a.db)
 	rpProduct := repository.NewProductsMySQL(a.db)
@@ -93,17 +144,17 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	a.router.Route("/customers", func(r chi.Router) {
 		// - GET /customers
 		r.Get("/", hdCustomer.GetAll())
-		r.Get("/conditions", hdCustomer.GetGroupByConditions())
-		r.Get("/ativos", hdCustomer.GetAmountCostumers())
+		r.Get("/conditions", hdCustomer.GetConditionsCustomer())
+		r.Get("/actives", hdCustomer.GetCustomersMoreActives())
 		// - POST /customers
 		r.Post("/", hdCustomer.Create())
 	})
 	a.router.Route("/products", func(r chi.Router) {
 		// - GET /products
 		r.Get("/", hdProduct.GetAll())
+		r.Get("/sold", hdProduct.GetProductsMoreSold())
 		// - POST /products
 		r.Post("/", hdProduct.Create())
-		r.Get("/quantity", hdProduct.GetTotalProductsSale())
 	})
 	a.router.Route("/invoices", func(r chi.Router) {
 		// - GET /invoices
@@ -127,4 +178,102 @@ func (a *ApplicationDefault) Run() (err error) {
 
 	err = http.ListenAndServe(a.cfgAddr, a.router)
 	return
+}
+
+func (a *ApplicationDefault) ImportCustomersFromJSON(filePath string) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("erro ao abrir o arquivo: %w", err)
+	}
+	defer file.Close()
+
+	var customers []handler.CustomerJSON
+	if err := json.NewDecoder(file).Decode(&customers); err != nil {
+		return fmt.Errorf("erro ao decodificar JSON: %w", err)
+	}
+
+	for _, customer := range customers {
+		_, err := a.db.Exec("INSERT INTO fantasy_products.customers (`id`, `first_name`, `last_name`, `condition`) VALUES (?, ?, ?, ?)", customer.Id, customer.FirstName, customer.LastName, customer.Condition)
+		if err != nil {
+			return fmt.Errorf("erro ao inserir customer %s: %w", customer.FirstName, err)
+		}
+	}
+
+	return nil
+}
+
+func (a *ApplicationDefault) ImportInvoicesFromJSON(filePath string) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("erro ao abrir o arquivo: %w", err)
+	}
+	defer file.Close()
+
+	var invoices []handler.InvoiceJSON
+	if err := json.NewDecoder(file).Decode(&invoices); err != nil {
+		return fmt.Errorf("erro ao decodificar JSON: %w", err)
+	}
+
+	for _, invoice := range invoices {
+		_, err := a.db.Exec("INSERT INTO fantasy_products.invoices (`id`, `datetime`, `customer_id`, `total`) VALUES (?, ?, ?, ?)", invoice.Id, invoice.Datetime, invoice.CustomerId, invoice.Total)
+		if err != nil {
+			return fmt.Errorf("erro ao inserir invoice com o ID %d: %w", invoice.Id, err)
+		}
+	}
+
+	return nil
+}
+
+func (a *ApplicationDefault) ImportProductsFromJSON(filePath string) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("erro ao abrir o arquivo: %w", err)
+	}
+	defer file.Close()
+
+	var products []handler.ProductJSON
+	if err := json.NewDecoder(file).Decode(&products); err != nil {
+		return fmt.Errorf("erro ao decodificar JSON: %w", err)
+	}
+
+	for _, product := range products {
+		_, err := a.db.Exec("INSERT INTO fantasy_products.products (`id`, `description`, `price`) VALUES (?, ?, ?)", product.Id, product.Description, product.Price)
+		if err != nil {
+			return fmt.Errorf("erro ao inserir product com o ID %d: %w", product.Id, err)
+		}
+	}
+
+	return nil
+}
+
+func (a *ApplicationDefault) ImportSalesFromJSON(filePath string) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("erro ao abrir o arquivo: %w", err)
+	}
+	defer file.Close()
+
+	var sales []handler.SaleJSON
+	if err := json.NewDecoder(file).Decode(&sales); err != nil {
+		return fmt.Errorf("erro ao decodificar JSON: %w", err)
+	}
+
+	for _, sale := range sales {
+		_, err := a.db.Exec("INSERT INTO fantasy_products.sales (`id`,`quantity`,`invoice_id`,`product_id`) VALUES (?, ?, ?, ?)", sale.Id, sale.Quantity, sale.InvoiceId, sale.ProductId)
+		if err != nil {
+			return fmt.Errorf("erro ao inserir sale com o ID %d: %w", sale.Id, err)
+		}
+	}
+
+	return nil
+}
+
+func (a *ApplicationDefault) CheckTableContainsData(tableName string) (bool, error) {
+	var count int
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s", tableName)
+	err := a.db.QueryRow(query).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("erro ao verificar a tabela %s: %w", tableName, err)
+	}
+	return count > 0, nil
 }

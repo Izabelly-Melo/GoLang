@@ -18,12 +18,12 @@ type Customer struct {
 	CustomerAttributes
 }
 
-type ResCustomer struct {
+type CustomersConditions struct {
 	Condition string
 	Total     float64
 }
 
-type ResAmountCustomer struct {
+type CustomersMoreActives struct {
 	FirstName string
 	LastName  string
 	Amount    float64

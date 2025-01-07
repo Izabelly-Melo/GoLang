@@ -28,7 +28,7 @@ type CustomerJSON struct {
 	Condition int    `json:"condition"`
 }
 
-type AtivoInativoJSON struct {
+type CustomerConditionJSON struct {
 	Condition string  `json:"condition"`
 	Total     float64 `json:"total"`
 }
@@ -114,18 +114,18 @@ func (h *CustomersDefault) Create() http.HandlerFunc {
 	}
 }
 
-func (h *CustomersDefault) GetGroupByConditions() http.HandlerFunc {
+func (h *CustomersDefault) GetConditionsCustomer() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		c, err := h.sv.GetGroupByConditions()
+		c, err := h.sv.GetConditionsCustomer()
 		if err != nil {
 			response.Error(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		csJSON := make([]AtivoInativoJSON, len(c))
+		csJSON := make([]CustomerConditionJSON, len(c))
 		for ix, v := range c {
-			csJSON[ix] = AtivoInativoJSON{
+			csJSON[ix] = CustomerConditionJSON{
 				Condition: v.Condition,
 				Total:     v.Total,
 			}
@@ -137,24 +137,23 @@ func (h *CustomersDefault) GetGroupByConditions() http.HandlerFunc {
 	}
 }
 
-type CustomerActivesJSON struct {
+type CustomerMoreActivesJSON struct {
 	FirstName string  `json:"first_name"`
 	LastName  string  `json:"last_name"`
 	Amount    float64 `json:"amount"`
 }
 
-func (h *CustomersDefault) GetAmountCostumers() http.HandlerFunc {
+func (h *CustomersDefault) GetCustomersMoreActives() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		c, err := h.sv.GetAmountCostumers()
+		c, err := h.sv.GetCustomersMoreActives()
 		if err != nil {
 			response.Error(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		csJSON := make([]CustomerActivesJSON, len(c))
+		csJSON := make([]CustomerMoreActivesJSON, len(c))
 		for ix, v := range c {
-			csJSON[ix] = CustomerActivesJSON{
+			csJSON[ix] = CustomerMoreActivesJSON{
 				FirstName: v.FirstName,
 				LastName:  v.LastName,
 				Amount:    v.Amount,
